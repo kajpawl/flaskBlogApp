@@ -2,10 +2,20 @@
 {% block content %}
     <form method="POST">
         {{ form.hidden_tag() }}
-        {{ form.email.label }} {{ form.email(class="form-control") }}<br>
-        {{ form.username.label }} {{ form.username(class="form-control") }}<br>
-        {{ form.password.label }} {{ form.password(class="form-control") }}<br>
-        {{ form.pass_confirm.label }} {{ form.pass_confirm(class="form-control") }}<br>
-        {{ form.submit(class="btn btn-primary") }}<br>
+        <div class="form-group">
+            {{ form.email.label }} {{ form.email(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.username.label }} {{ form.username(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.password.label }} {{ form.password(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.pass_confirm.label }} {{ form.pass_confirm(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
     </form>
 {% endblock %}
