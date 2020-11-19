@@ -14,7 +14,7 @@ class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     profile_image = db.Column(db.String(64), nullable=False, default='default_profile.png')
-    email = db.Column(db.Email(64), unique=True, index=True)
+    email = db.Column(db.String(64), unique=True, index=True)
     username = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
 

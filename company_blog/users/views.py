@@ -5,7 +5,7 @@ from company_blog.models import User, BlogPost
 from company_blog.users.forms import RegistrationForm, LoginForm, UpdateUserForm
 from company_blog.users.picture_handler import add_profile_pic
 
-users = Blueprint('user', __name__)
+users = Blueprint('users', __name__)
 
 
 @users.route('/register', methods=['GET', 'POST'])
@@ -64,7 +64,7 @@ def account():
             pic = add_profile_pic(form.picture.data, username)
             current_user.profile_image = pic
 
-        current_user.username = form.user.data
+        current_user.username = form.username.data
         current_user.email = form.email.data
 
         db.session.commit()
@@ -85,5 +85,4 @@ def user_posts(username):
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(username=username).first_or_404()
     blog_posts = BlogPost.query.filter_by(author=user).order_by(BlogPost.date.desc()).paginate(page=page, per_page=5)
-    return render_template('user_blog_posts.html', blog_posts, user=user)
-
+    return render_template('user_blog_posts.html', blog_posts=blog_posts, user=user)
