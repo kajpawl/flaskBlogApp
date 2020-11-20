@@ -3,14 +3,14 @@
     <div class="container">
         <div class="jumbotron text-center">
             <h1>Welcome to the page for {{ user.username }}</h1>
-            <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_image) }}"
-                 alt="{{ username }}'s profile pic">
+            <img src="{{ url_for('static', filename='profile_pics/' + user.profile_image) }}"
+                 alt="{{ user }}'s profile pic">
         </div>
 
         {% for post in blog_posts.items %}
             <h2><a href="{{ url_for('blog_posts.blog_post', blog_post_id=post.id) }}">{{ post.title }}</a></h2>
-            <p>Written by: <a href="{{ url_for('users.user_post', username=post.author.username) }}"></a></p>
-            <p class="text-muted">Published on: {{ post.date.strftime(%Y-%m-%d) }}</p>
+            <p><a href="{{ url_for('users.user_posts', username=post.author.username) }}">Written by: {{ post.author.username }}</a></p>
+            <p class="text-muted">Published on: {{ post.date.strftime('%Y-%m-%d') }}</p>
             <br>
             <p>{{ post.text }}</p>
             <br>
@@ -23,14 +23,14 @@
                 {% if blog_posts.page == page_number %}
                     <li class="page-item disabled">
                         <a class="page-link"
-                           href="{{ url_for('users.user_posts, username=user.username, page=page_number) }}">
+                           href="{{ url_for('users.user_posts', username=user.username, page=page_number) }}">
                             {{ page_number }}
                         </a>
                     </li>
                 {% else %}
                     <li class="page-item">
                         <a class="page-link"
-                           href="{{ url_for('users.user_posts, username=user.username, page=page_number) }}">
+                           href="{{ url_for('users.user_posts', username=user.username, page=page_number) }}">
                             {{ page_number }}
                         </a>
                     </li>
