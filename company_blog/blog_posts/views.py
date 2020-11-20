@@ -35,7 +35,7 @@ def blog_post(blog_post_id):
                            post=blog_post)
 
 
-@blog_posts.route('/<int:blog_post_id>/update')
+@blog_posts.route('/<int:blog_post_id>/update', methods=['GET', 'POST'])
 @login_required
 def update_post(blog_post_id):
     blog_post = BlogPost.query.get_or_404(blog_post_id)
@@ -55,13 +55,13 @@ def update_post(blog_post_id):
         return redirect(url_for('blog_posts.blog_post', blog_post_id=blog_post_id))
 
     elif request.method == 'GET':
-        form.title.data = blog_post.data
+        form.title.data = blog_post.title
         form.text.data = blog_post.text
 
-    return render_template('update_post.html', title='Updating', form=form)
+    return render_template('create_post.html', title='Updating', form=form)
 
 
-@blog_posts.route('/<int:blog_post_id>/delete')
+@blog_posts.route('/<int:blog_post_id>/delete', methods=['GET', 'POST'])
 @login_required
 def delete_post(blog_post_id):
     blog_post = BlogPost.query.get_or_404(blog_post_id)
