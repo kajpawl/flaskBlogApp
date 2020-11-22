@@ -1,5 +1,8 @@
+from werkzeug.routing import ValidationError
+
 from company_blog import db, login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import url_for
 from flask_login import UserMixin
 from datetime import datetime
 
@@ -28,6 +31,17 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def to_json(self, user_id):
+        json_user = {
+            'url': url_for('users_api.get_user', id=self.id),
+            'username': self.username,
+            'posts_url': url_for('blog_posts_api.get_user_posts', id=self.id),
+            'posts_count': self.posts.count()
+        }
+        if user_id is not None and user_id == self.id:
+            json_user.email = self.email
+        return json_user
+
     def __repr__(self):
         return f"Username {self.username}"
 
@@ -46,6 +60,31 @@ class BlogPost(db.Model):
         self.title = title
         self.text = text
         self.user_id = user_id
+
+    def to_json(self):
+        json_post = {
+            'url': url_for('blog_posts_api.get_post', post_id=self.id),
+            'date': self.date,
+            'title': self.title,
+            'text': self.text,
+            'author_id': self.user_id,
+            # 'author_url': url_for('users_api.get_user', id=self.user_id)
+        }
+        return json_post
+
+    @staticmethod
+    def from_json(json_post, user_id):
+        title = json_post.get('title')
+        text = json_post.get('text')
+
+        if title is None or title == '':
+            raise ValidationError('Post has no title.')
+        if text is None or text == '':
+            raise ValidationError('Post has no text.')
+
+        return BlogPost(title=title,
+                        text=text,
+                        user_id=user_id)
 
     def __repr__(self):
         return f"Post ID: {self.id} -- Date: {self.date} -- {self.title}"
