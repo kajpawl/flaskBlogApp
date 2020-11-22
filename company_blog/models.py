@@ -31,15 +31,15 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def to_json(self, user_id):
+    def to_json(self, user_id=None):
         json_user = {
-            'url': url_for('users_api.get_user', id=self.id),
+            'url': url_for('users_api.get_user', username=self.username),
             'username': self.username,
-            'posts_url': url_for('blog_posts_api.get_user_posts', id=self.id),
-            'posts_count': self.posts.count()
+            'posts_url': url_for('users_api.get_user_posts', username=self.username),
+            'posts_count': len(self.posts)
         }
         if user_id is not None and user_id == self.id:
-            json_user.email = self.email
+            json_user['email'] = self.email
         return json_user
 
     def __repr__(self):
@@ -67,8 +67,8 @@ class BlogPost(db.Model):
             'date': self.date,
             'title': self.title,
             'text': self.text,
-            'author_id': self.user_id,
-            # 'author_url': url_for('users_api.get_user', id=self.user_id)
+            'author': self.author.username,
+            'author_url': url_for('users_api.get_user', username=self.author.username)
         }
         return json_post
 

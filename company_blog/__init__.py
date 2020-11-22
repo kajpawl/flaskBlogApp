@@ -39,8 +39,8 @@ app.register_blueprint(users)
 app.register_blueprint(blog_posts)
 app.register_blueprint(error_pages)
 
-# from company_blog.users.api import users_api
+from company_blog.users.api import users_api
 from company_blog.blog_posts.api import blog_posts_api
 
-# app.register_blueprint(users_api, url_prefix='/api/v1')
+app.register_blueprint(users_api, url_prefix='/api/v1')
 app.register_blueprint(blog_posts_api, url_prefix='/api/v1')

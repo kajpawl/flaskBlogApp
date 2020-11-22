@@ -1,88 +1,79 @@
-from flask import render_template, url_for, flash, redirect, request, Blueprint
-from flask_login import login_user, current_user, logout_user, login_required
+from flask import request, Blueprint, abort, jsonify
 from company_blog import db
 from company_blog.models import User, BlogPost
-from company_blog.users.forms import RegistrationForm, LoginForm, UpdateUserForm
-from company_blog.users.picture_handler import add_profile_pic
 
-users = Blueprint('users', __name__)
+users_api = Blueprint('users_api', __name__)
 
 
-@users.route('/register', methods=['GET', 'POST'])
+@users_api.route('/users/register', methods=['POST'])
 def register():
-    form = RegistrationForm()
+    email = request.json.get('email')
+    username = request.json.get('username')
+    password = request.json.get('password')
+    if not email or not username or not password:
+        abort(403)
 
-    if form.validate_on_submit():
-        user = User(email=form.email.data,
-                    username=form.username.data,
-                    password=form.password.data)
+    user_with_email = User.query.filter_by(email=email).first()
+    user_with_username = User.query.filter_by(username=username).first()
+    if user_with_email or user_with_username:
+        abort(403)
 
-        db.session.add(user)
-        db.session.commit()
+    new_user = User(email=email,
+                    username=username,
+                    password=password)
 
-        flash('Thank you for registering!')
-        return redirect(url_for('users.login'))
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify(new_user.to_json(new_user.id)), 201
 
-    return render_template('register.html', form=form)
 
-
-@users.route('/login', methods=['GET', 'POST'])
+@users_api.route('/users/login', methods=['POST'])
 def login():
-    form = LoginForm()
+    email = request.json.get('email')
+    password = request.json.get('password')
 
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-
-        if user is not None and user.check_password(form.password.data):
-            login_user(user)
-            flash('Login success!')
-
-            next = request.args.get('next')
-
-            if next is None or not next[0] == '/':
-                next = url_for('core.index')
-
-            return redirect(next)
-
-    return render_template('login.html', form=form)
+    user = User.query.filter_by(email=email).first_or_404()
+    if not user.check_password(password):
+        abort(403)
+    # TODO: actually login user
+    return jsonify(user.to_json(user.id))
 
 
-@users.route('/logout')
+@users_api.route('/users/logout')
 def logout():
-    logout_user()
-    return redirect(url_for('core.index'))
+    # TODO: logout user
+    return jsonify({'message': 'User logged out.'})
 
 
-@users.route('/account', methods=['GET', 'POST'])
-@login_required
+@users_api.route('/users/account', methods=['GET'])
+# @login_required
 def account():
-    form = UpdateUserForm()
-
-    if form.validate_on_submit():
-        if form.picture.data:
-            username = current_user.username
-            pic = add_profile_pic(form.picture.data, username)
-            current_user.profile_image = pic
-
-        current_user.username = form.username.data
-        current_user.email = form.email.data
-
-        db.session.commit()
-
-        flash('User account updated!')
-        return redirect(url_for('users.account'))
-
-    elif request.method == 'GET':
-        form.username.data = current_user.username
-        form.email.data = current_user.email
-
-    profile_image = url_for('static', filename='profile_pics/' + current_user.profile_image)
-    return render_template('account.html', profile_image=profile_image, form=form)
+    user_id = 1  # TODO: replace with current_user
+    user = User.query.get_or_404(user_id)
+    return jsonify(user.to_json(user_id))
 
 
-@users.route('/<username>')
-def user_posts(username):
+@users_api.route('/users', methods=['GET'])
+# @login_required
+def get_users():
+    users_list = User.query.all()
+    return jsonify({'users': [user.to_json() for user in users_list]})
+
+
+@users_api.route('/users/<username>', methods=['GET'])
+# @login_required
+def get_user(username):
+    user_id = 1  # TODO: replace with current_user
+    user = User.query.filter_by(username=username).first_or_404()
+    return jsonify(user.to_json(user_id))
+
+
+@users_api.route('/users/<username>/posts')
+# @login_required
+def get_user_posts(username):
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(username=username).first_or_404()
-    blog_posts = BlogPost.query.filter_by(author=user).order_by(BlogPost.date.desc()).paginate(page=page, per_page=5)
-    return render_template('user_blog_posts.html', blog_posts=blog_posts, user=user)
+    posts = BlogPost.query.filter_by(author=user).order_by(BlogPost.date.desc()).paginate(page=page, per_page=5)
+    return jsonify(
+        {'total': posts.total, 'pages': posts.pages, 'page': posts.page, 'per_page': posts.per_page,
+         'posts': [post.to_json() for post in posts.items]})
