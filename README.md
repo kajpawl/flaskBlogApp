@@ -8,6 +8,98 @@ The project was deployed and is available at [Heroku](https://flask-company-blog
 
 The application provides features of **registering new users, logging in, updating and fetching users**, as well as **listing, adding, updating and removing posts**. It allows uploading user profile photos.
 
+## REST API Endpoints
+
+The API implemented in the architecture supports the following endpoints:
+
+### Posts
+- Get all posts:
+`
+GET: /api/v1/posts
+`
+
+- Get single post:
+`
+GET: /api/v1/posts/<id>
+`
+
+- Upload new post:
+`
+POST: /api/v1/posts
+`  
+```
+{
+  "title": "Post title",
+  "text": "Post text"
+}
+```
+
+- Edit post
+`
+PUT / PATCH: /api/v1/posts/<id>
+`  
+```
+{
+  "title": "Post title",
+  "text": "Post text"
+}
+```
+
+- Delete post:
+`
+DELETE: /api/v1/posts/<id>
+`
+
+
+### Users
+- Register new user:
+`
+POST: /api/v1/users/register
+`  
+```
+{
+  "email": "sample@email.com",
+  "username": "Username",
+  "password": "password"
+}
+```
+
+- Log in:
+`
+POST: /api/v1/users/login
+`  
+```
+{
+  "username": "Username",
+  "password": "password"
+}
+```
+
+- Log out:
+`
+GET: /api/v1/users/logout
+`  
+
+- Get all users
+`
+GET: /api/v1/users
+`
+
+- Get single user
+`
+GET: /api/v1/users/<username>
+`
+
+- Get your account data
+`
+GET: /api/v1/users/account
+`
+
+- Get posts of a user
+`
+GET: /api/v1/users/<username>/posts
+`
+
 ## Setup
 
 - Clone repository
