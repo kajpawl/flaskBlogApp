@@ -13,6 +13,15 @@ def register():
     form = RegistrationForm()
 
     if form.validate_on_submit():
+        user_with_email = User.query.filter_by(email=form.email.data).first()
+        user_with_username = User.query.filter_by(username=form.username.data).first()
+        if user_with_email:
+            form.email.errors = ['This email is already used.']
+        if user_with_username:
+            form.username.errors = ['This username is already used.']
+        if user_with_email or user_with_username:
+            return render_template('register.html', form=form)
+
         user = User(email=form.email.data,
                     username=form.username.data,
                     password=form.password.data)
@@ -63,6 +72,19 @@ def account():
             username = current_user.username
             pic = add_profile_pic(form.picture.data, username)
             current_user.profile_image = pic
+
+        incorrect_user_data = False
+        user_with_email = User.query.filter_by(email=form.email.data).first()
+        user_with_username = User.query.filter_by(username=form.username.data).first()
+        if user_with_email and user_with_email != current_user:
+            incorrect_user_data = True
+            form.email.errors = ['This email is already used.']
+        if user_with_username and user_with_username != current_user:
+            incorrect_user_data = True
+            form.username.errors = ['This username is already used.']
+        if incorrect_user_data:
+            profile_image = url_for('static', filename='profile_pics/' + current_user.profile_image)
+            return render_template('account.html', profile_image=profile_image, form=form)
 
         current_user.username = form.username.data
         current_user.email = form.email.data

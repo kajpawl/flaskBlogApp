@@ -4,15 +4,35 @@
         {{ form.hidden_tag() }}
         <div class="form-group">
             {{ form.email.label }} {{ form.email(class="form-control") }}
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="form-group">
             {{ form.username.label }} {{ form.username(class="form-control") }}
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="form-group">
             {{ form.password.label }} {{ form.password(class="form-control") }}
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="form-group">
             {{ form.pass_confirm.label }} {{ form.pass_confirm(class="form-control") }}
+            {% if form.pass_confirm.errors %}
+                {% for error in form.pass_confirm.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="form-group">
             {{ form.submit(class="btn btn-primary") }}
