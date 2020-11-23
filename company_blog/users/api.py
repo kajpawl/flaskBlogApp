@@ -68,6 +68,42 @@ def get_user(username):
     return jsonify(user.to_json(user_id))
 
 
+@users_api.route('/users/<username>', methods=['PUT', 'PATCH'])
+# @login_required
+def update_user(username):
+    user_id = 1  # TODO: replace with current_user
+    user = User.query.filter_by(username=username).first_or_404()
+    confirm_password = user.check_password(request.json.get('confirm_password'))
+    if not confirm_password or user.id != user_id:
+        abort(403)
+
+    user_with_email = User.query.filter_by(email=request.json.get('email')).first()
+    user_with_username = User.query.filter_by(username=request.json.get('username')).first()
+    if user_with_email or user_with_username:
+        abort(403)
+
+    user.email = request.json.get('email', user.email)
+    user.username = request.json.get('username', user.username)
+    user.password = request.json.get('password', user.password)
+
+    db.session.add(user)
+    db.session.commit()
+    return jsonify(user.to_json(user_id))
+
+
+@users_api.route('/users/<username>', methods=['DELETE'])
+# @login_required
+def delete_user(username):
+    user_id = 1  # TODO: replace with current_user
+    user = User.query.filter_by(username=username).first_or_404()
+    if user.id != user_id:
+        abort(403)
+
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'message': f'User {username} deleted.'})
+
+
 @users_api.route('/users/<username>/posts')
 # @login_required
 def get_user_posts(username):

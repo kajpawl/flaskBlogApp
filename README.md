@@ -34,7 +34,7 @@ POST: /api/v1/posts
 }
 ```
 
-- Edit post
+- Edit post:
 `
 PUT / PATCH: /api/v1/posts/<id>
 `  
@@ -52,7 +52,17 @@ DELETE: /api/v1/posts/<id>
 
 
 ### Users
-- Register new user:
+- Get all users:
+`
+GET: /api/v1/users
+`
+
+- Get single user:
+`
+GET: /api/v1/users/<username>
+`
+
+- Create new user (register):
 `
 POST: /api/v1/users/register
 `  
@@ -64,40 +74,48 @@ POST: /api/v1/users/register
 }
 ```
 
+- Update user:
+`
+PUT / PATCH: /api/v1/users/<username>
+`  
+```
+{
+  "confirm_password": "current password",
+  "email": "new email",
+  "username": "new username",
+  "password": "new password"
+}
+```
+
+- Delete user:
+`
+DELETE: /api/v1/users/<username>
+`
+
+- Get posts of a user:
+`
+GET: /api/v1/users/<username>/posts
+`  
+
+- Get your account data
+`
+GET: /api/v1/users/account
+`  
+
 - Log in:
 `
 POST: /api/v1/users/login
 `  
 ```
 {
-  "username": "Username",
-  "password": "password"
+  "username": "your sername",
+  "password": "your password"
 }
 ```
 
 - Log out:
 `
 GET: /api/v1/users/logout
-`  
-
-- Get all users
-`
-GET: /api/v1/users
-`
-
-- Get single user
-`
-GET: /api/v1/users/<username>
-`
-
-- Get your account data
-`
-GET: /api/v1/users/account
-`
-
-- Get posts of a user
-`
-GET: /api/v1/users/<username>/posts
 `
 
 ## Setup
