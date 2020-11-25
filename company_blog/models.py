@@ -1,10 +1,9 @@
-from werkzeug.routing import ValidationError
-
-from company_blog import db, login_manager
-from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 from flask import url_for
 from flask_login import UserMixin
-from datetime import datetime
+from werkzeug.routing import ValidationError
+from werkzeug.security import generate_password_hash, check_password_hash
+from company_blog import db, login_manager
 
 
 @login_manager.user_loader

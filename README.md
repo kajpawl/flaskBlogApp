@@ -1,6 +1,6 @@
 ## About
 
-The project is a full-stack blog application written in Python using Flask microframework. It provides a simple blogging service and includes authentication through flask-login. The data is stored in the SQLite database. The frontend is provided through Jinja templates and WTForms.
+The project is a full-stack blog application written in Python using Flask microframework. It provides a simple blogging service and includes authentication through Flask-Login (Flask-JWT-Extended for API). The data is stored in the SQLite database. The frontend is provided through Jinja templates and WTForms.
 
 The project was deployed and is available at [Heroku](https://flask-company-blog-app.herokuapp.com/).
 
@@ -10,7 +10,7 @@ The application provides features of **registering new users, logging in, updati
 
 ## REST API Endpoints
 
-The API implemented in the architecture supports the following endpoints:
+The API is implemented in the REST architecture. All "non-GET" routes require authentication through JWT (received through `login` endpoint). The API supports the following endpoints:
 
 ### Posts
 - Get all posts:
@@ -62,6 +62,18 @@ GET: /api/v1/users
 GET: /api/v1/users/<username>
 `
 
+- Log in:
+`
+POST: /api/v1/users/login
+`  
+```
+{
+  "username": "your sername",
+  "password": "your password"
+}
+```
+
+
 - Create new user (register):
 `
 POST: /api/v1/users/register
@@ -92,31 +104,15 @@ PUT / PATCH: /api/v1/users/<username>
 DELETE: /api/v1/users/<username>
 `
 
-- Get posts of a user:
-`
-GET: /api/v1/users/<username>/posts
-`  
-
 - Get your account data
 `
 GET: /api/v1/users/account
 `  
 
-- Log in:
+- Get posts of a user:
 `
-POST: /api/v1/users/login
+GET: /api/v1/users/<username>/posts
 `  
-```
-{
-  "username": "your sername",
-  "password": "your password"
-}
-```
-
-- Log out:
-`
-GET: /api/v1/users/logout
-`
 
 ## Setup
 
@@ -144,6 +140,7 @@ Technology-wise, the app utilizes:
 - Python 3.8.6
 - Flask 1.1.2
 - Flask-Login 0.5.0
+- Flask-JWT-Extended 3.25.0
 - Jinja2 2.11.2
 - WTForms 2.3.3
 - Pillow 8.0.1

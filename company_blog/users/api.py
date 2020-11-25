@@ -1,4 +1,6 @@
 from flask import request, Blueprint, abort, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
+from werkzeug.security import generate_password_hash
 from company_blog import db
 from company_blog.models import User, BlogPost
 
@@ -11,12 +13,12 @@ def register():
     username = request.json.get('username')
     password = request.json.get('password')
     if not email or not username or not password:
-        abort(403)
+        abort(400)
 
     user_with_email = User.query.filter_by(email=email).first()
     user_with_username = User.query.filter_by(username=username).first()
     if user_with_email or user_with_username:
-        abort(403)
+        abort(400)
 
     new_user = User(email=email,
                     username=username,
@@ -29,49 +31,44 @@ def register():
 
 @users_api.route('/users/login', methods=['POST'])
 def login():
-    email = request.json.get('email')
-    password = request.json.get('password')
+    email = request.json.get('email', None)
+    password = request.json.get('password', None)
 
-    user = User.query.filter_by(email=email).first_or_404()
-    if not user.check_password(password):
-        abort(403)
-    # TODO: actually login user
-    return jsonify(user.to_json(user.id))
+    user = User.query.filter_by(email=email).first()
+    if not user or not user.check_password(password):
+        abort(401)
 
-
-@users_api.route('/users/logout')
-def logout():
-    # TODO: logout user
-    return jsonify({'message': 'User logged out.'})
+    access_token = create_access_token(identity=user.id)
+    return jsonify(access_token=access_token), 200
 
 
 @users_api.route('/users/account', methods=['GET'])
-# @login_required
+@jwt_required
 def account():
-    user_id = 1  # TODO: replace with current_user
+    user_id = get_jwt_identity()
     user = User.query.get_or_404(user_id)
     return jsonify(user.to_json(user_id))
 
 
 @users_api.route('/users', methods=['GET'])
-# @login_required
 def get_users():
     users_list = User.query.all()
     return jsonify({'users': [user.to_json() for user in users_list]})
 
 
 @users_api.route('/users/<username>', methods=['GET'])
-# @login_required
 def get_user(username):
-    user_id = 1  # TODO: replace with current_user
+    user_id = get_jwt_identity()
     user = User.query.filter_by(username=username).first_or_404()
+    if not user:
+        abort(403)
     return jsonify(user.to_json(user_id))
 
 
 @users_api.route('/users/<username>', methods=['PUT', 'PATCH'])
-# @login_required
+@jwt_required
 def update_user(username):
-    user_id = 1  # TODO: replace with current_user
+    user_id = get_jwt_identity()
     user = User.query.filter_by(username=username).first_or_404()
     confirm_password = user.check_password(request.json.get('confirm_password'))
     if not confirm_password or user.id != user_id:
@@ -79,12 +76,15 @@ def update_user(username):
 
     user_with_email = User.query.filter_by(email=request.json.get('email')).first()
     user_with_username = User.query.filter_by(username=request.json.get('username')).first()
-    if user_with_email or user_with_username:
+    if user_with_email and user_with_email.id != user_id or \
+            user_with_username and user_with_username.id != user_id:
         abort(403)
 
     user.email = request.json.get('email', user.email)
     user.username = request.json.get('username', user.username)
-    user.password = request.json.get('password', user.password)
+    new_password = request.json.get('password', None)
+    if new_password:
+        user.password_hash = generate_password_hash(new_password)
 
     db.session.add(user)
     db.session.commit()
@@ -92,20 +92,19 @@ def update_user(username):
 
 
 @users_api.route('/users/<username>', methods=['DELETE'])
-# @login_required
+@jwt_required
 def delete_user(username):
-    user_id = 1  # TODO: replace with current_user
+    user_id = get_jwt_identity()
     user = User.query.filter_by(username=username).first_or_404()
     if user.id != user_id:
         abort(403)
 
     db.session.delete(user)
     db.session.commit()
-    return jsonify({'message': f'User {username} deleted.'})
+    return jsonify({'msg': f'User {username} deleted.'})
 
 
 @users_api.route('/users/<username>/posts')
-# @login_required
 def get_user_posts(username):
     page = request.args.get('page', 1, type=int)
     user = User.query.filter_by(username=username).first_or_404()

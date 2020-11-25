@@ -1,8 +1,8 @@
 import os
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
@@ -38,6 +38,13 @@ app.register_blueprint(core)
 app.register_blueprint(users)
 app.register_blueprint(blog_posts)
 app.register_blueprint(error_pages)
+
+
+####################################
+#            API SETUP             #
+####################################
+from flask_jwt_extended import JWTManager
+jwt = JWTManager(app)
 
 from company_blog.users.api import users_api
 from company_blog.blog_posts.api import blog_posts_api
