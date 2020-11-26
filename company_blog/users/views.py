@@ -11,27 +11,29 @@ users = Blueprint('users', __name__)
 @users.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-
     if form.validate_on_submit():
+        incorrect_user_data = False
         user_with_email = User.query.filter_by(email=form.email.data).first()
         user_with_username = User.query.filter_by(username=form.username.data).first()
         if user_with_email:
+            incorrect_user_data = True
             form.email.errors = ['This email is already used.']
         if user_with_username:
+            incorrect_user_data = True
             form.username.errors = ['This username is already used.']
-        if user_with_email or user_with_username:
-            flash('Please correct all errors.', 'danger')
-            return render_template('register.html', form=form)
+        if not incorrect_user_data:
+            user = User(email=form.email.data,
+                        username=form.username.data,
+                        password=form.password.data)
 
-        user = User(email=form.email.data,
-                    username=form.username.data,
-                    password=form.password.data)
+            db.session.add(user)
+            db.session.commit()
 
-        db.session.add(user)
-        db.session.commit()
+            flash('Thank you for registering!', 'success')
+            return redirect(url_for('users.login'))
 
-        flash('Thank you for registering!', 'success')
-        return redirect(url_for('users.login'))
+    if request.method == 'POST':
+        flash('Please correct all errors.', 'danger')
 
     return render_template('register.html', form=form)
 
@@ -39,23 +41,20 @@ def register():
 @users.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-
         if user is not None and user.check_password(form.password.data):
             login_user(user)
             flash('Login success!', 'success')
 
             next = request.args.get('next')
-
             if next is None or not next[0] == '/':
                 next = url_for('core.index')
 
             return redirect(next)
 
     if request.method == 'POST':
-        flash('Wrong username or password.', 'danger')
+        flash('Incorrect email or password.', 'danger')
 
     return render_template('login.html', form=form)
 
@@ -71,7 +70,6 @@ def logout():
 @login_required
 def account():
     form = UpdateUserForm()
-
     if form.validate_on_submit():
         if form.picture.data:
             username = current_user.username
