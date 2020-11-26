@@ -20,7 +20,7 @@ def create_post():
         db.session.add(blog_post)
         db.session.commit()
 
-        flash('Blog post created!')
+        flash('Blog post created!', 'success')
         return redirect(url_for('core.index'))
 
     return render_template('create_post.html', form=form)
@@ -51,7 +51,7 @@ def update_post(blog_post_id):
         db.session.add(blog_post)
         db.session.commit()
 
-        flash('Blog post updated!')
+        flash('Blog post updated!', 'success')
         return redirect(url_for('blog_posts.blog_post', blog_post_id=blog_post_id))
 
     elif request.method == 'GET':
@@ -72,5 +72,5 @@ def delete_post(blog_post_id):
     db.session.delete(blog_post)
     db.session.commit()
 
-    flash('Blog post deleted!')
+    flash('Blog post deleted!', 'success')
     return redirect(url_for('core.index'))

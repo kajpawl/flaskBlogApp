@@ -20,6 +20,7 @@ def register():
         if user_with_username:
             form.username.errors = ['This username is already used.']
         if user_with_email or user_with_username:
+            flash('Please correct all errors.', 'danger')
             return render_template('register.html', form=form)
 
         user = User(email=form.email.data,
@@ -29,7 +30,7 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        flash('Thank you for registering!')
+        flash('Thank you for registering!', 'success')
         return redirect(url_for('users.login'))
 
     return render_template('register.html', form=form)
@@ -44,7 +45,7 @@ def login():
 
         if user is not None and user.check_password(form.password.data):
             login_user(user)
-            flash('Login success!')
+            flash('Login success!', 'success')
 
             next = request.args.get('next')
 
@@ -52,6 +53,7 @@ def login():
                 next = url_for('core.index')
 
             return redirect(next)
+        flash('Wrong username or password.', 'danger')
 
     return render_template('login.html', form=form)
 
@@ -84,6 +86,7 @@ def account():
             form.username.errors = ['This username is already used.']
         if incorrect_user_data:
             profile_image = url_for('static', filename='profile_pics/' + current_user.profile_image)
+            flash('Please correct all errors.', 'danger')
             return render_template('account.html', profile_image=profile_image, form=form)
 
         current_user.username = form.username.data
@@ -91,7 +94,7 @@ def account():
 
         db.session.commit()
 
-        flash('User account updated!')
+        flash('User account updated!', 'success')
         return redirect(url_for('users.account'))
 
     elif request.method == 'GET':
