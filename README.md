@@ -10,7 +10,7 @@ The application provides features of **registering new users, logging in, updati
 
 ## REST API Endpoints
 
-The API is implemented in the REST architecture. All "non-GET" routes require authentication through JWT (received through `login` endpoint). The API supports the following endpoints:
+The API is implemented in the REST architecture, and supports the following endpoints:
 
 ### Posts
 - Get all posts:
@@ -113,6 +113,13 @@ GET: /api/v1/users/account
 `
 GET: /api/v1/users/<username>/posts
 `  
+
+## API Authentication
+All API endpoints for POST, PUT, PATCH and DELETE requests require authentication through JSON Web Token. The token should be passed in the `Authorization` request header in the following format:
+```
+Bearer: <JWT>
+```
+The token can be received through `POST: api/v1/users/login` endpoint.
 
 ## Setup
 
